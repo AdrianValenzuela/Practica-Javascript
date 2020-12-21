@@ -1,6 +1,8 @@
-import WorldCup from "./classes/WorldCup.js";
-import { Teams } from "./teams.js";
+import Game from './classes/Game.js';
 
-const wolrdCup = new WorldCup(Teams);
+const game = new Game();
 
-console.log(wolrdCup.groupStage);
+console.log("Grupos y equipos");
+console.log("=====================");
+game.printGroups();
+game.printMatches();

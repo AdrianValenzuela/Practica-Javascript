@@ -1,5 +1,5 @@
 export const Teams = [
-    "Alemania", "Argelia", "Argentina", "Australia", 
+    "Alemania", "Argelia", "Argentina", "Australia",
     "Brasil", "Camerún", "Chile", "Costa de Marfil",
     "Dinamarca", "EEUU", "Eslovaquia", "Eslovenia",
     "España", "Francia", "Ghana", "Grecia",

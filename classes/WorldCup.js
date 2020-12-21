@@ -1,10 +1,13 @@
 export default class WorldCup {
+
     constructor (teams = [], config = {}) {
         this.name = "World Cup";
         this.config = {};
         this.setup(config); 
         this.groupStage = [];
         this.setupGroupStage(teams);
+        this.matchSchedule = [];
+        this.setupMatchSchedule(this.groupStage);
     }
 
     setup(config) {
@@ -51,5 +54,48 @@ export default class WorldCup {
         return group;
     }
 
+    setupMatchSchedule(groupStage) {
+        for (let i = 0; i < groupStage.length; i++) {
+            const numberOfMatchDays = groupStage[i].length - 1;
+            const numberOfMatchesPerMatchDay = groupStage[i].length / 2;
+            this.generateMatchDays(numberOfMatchDays, numberOfMatchesPerMatchDay, groupStage[i]);
+        }
+    }
 
+    generateMatchDays(numberOfMatchDays, numberOfMatchesPerMatchDay, groupTeams) {
+        let matchNumber = 1;
+        for(let i = 0; i < numberOfMatchDays; i++) {
+            const matchDay = []; // jornada vacía
+
+            for (let j = 0; j < numberOfMatchesPerMatchDay; j++) {
+                matchDay.push(this.generateMatch(groupTeams, matchNumber));
+                matchNumber++;
+            }
+
+            this.matchSchedule.push(matchDay);
+        }
+    }
+
+    generateMatch(groupTeams, matchNumber) {
+        switch(matchNumber){
+            case 1:
+                return [groupTeams[0], groupTeams[1]];
+                break;
+            case 2:
+                return [groupTeams[2], groupTeams[3]];
+                break;
+            case 3:
+                return [groupTeams[1], groupTeams[2]];
+                break;
+            case 4:
+                return [groupTeams[3], groupTeams[0]];
+                break;
+            case 5:
+                return [groupTeams[1], groupTeams[3]];
+                break;
+            case 6:
+                return [groupTeams[0], groupTeams[2]];
+                break;
+        }        
+    }
 }
