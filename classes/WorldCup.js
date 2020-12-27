@@ -3,50 +3,50 @@ export default class WorldCup {
     constructor (teams = [], config = {}) {
         this.name = "World Cup";
         this.config = {};
-        this.setup(config); 
-        this.groupStage = [];
+        this.setup(); 
+        this.groupStage = {};
         this.setupGroupStage(teams);
         this.matchSchedule = [];
         this.setupMatchSchedule(this.groupStage);
     }
 
-    setup(config) {
-        const defaultConfig = {
-            rounds: 1,
+    setup() {
+        this.config = {
             pointsPerWin: 3,
             pointsPerDraw: 1,
             pointsPerLose: 0
         };
-
-        this.config = Object.assign(defaultConfig, config);
     }
 
     setupGroupStage(teams) {
-        const groupA = this.generateGroup(teams);
-        const groupB = this.generateGroup(teams);
-        const groupC = this.generateGroup(teams);
-        const groupD = this.generateGroup(teams);
-        const groupE = this.generateGroup(teams);
-        const groupF = this.generateGroup(teams);
-        const groupG = this.generateGroup(teams);
-        const groupH = this.generateGroup(teams);
+        const groupA = this.generateGroup(teams, 'A');
+        const groupB = this.generateGroup(teams, 'B');
+        const groupC = this.generateGroup(teams, 'C');
+        const groupD = this.generateGroup(teams, 'D');
+        const groupE = this.generateGroup(teams, 'E');
+        const groupF = this.generateGroup(teams, 'F');
+        const groupG = this.generateGroup(teams, 'G');
+        const groupH = this.generateGroup(teams, 'H');
 
-        this.groupStage.push(groupA);
-        this.groupStage.push(groupB);
-        this.groupStage.push(groupC);
-        this.groupStage.push(groupD);
-        this.groupStage.push(groupE);
-        this.groupStage.push(groupF);
-        this.groupStage.push(groupG);
-        this.groupStage.push(groupH);
+        const groups = [groupA, groupB, groupC, groupD,
+                        groupE, groupF, groupG, groupH];
+
+        this.groupStage = {
+            groups: groups,
+            matchSchedule: [],
+            results: {}
+        };
     }
 
-    generateGroup(teams) {
-        const group = []
+    generateGroup(teams, name) {
+        const group = {
+            name: name,
+            teams: []
+        };
         let numberOfTeams = teams.length;
         for (let i = 0; i < 4; i++) {
             const randomIndex = Math.floor((Math.random() * numberOfTeams));
-            group.push(teams[randomIndex]);
+            group.teams.push(teams[randomIndex]);
             teams.splice(randomIndex, 1);
             numberOfTeams = teams.length;
         }
@@ -55,47 +55,69 @@ export default class WorldCup {
     }
 
     setupMatchSchedule(groupStage) {
-        for (let i = 0; i < groupStage.length; i++) {
-            const numberOfMatchDays = groupStage[i].length - 1;
-            const numberOfMatchesPerMatchDay = groupStage[i].length / 2;
-            this.generateMatchDays(numberOfMatchDays, numberOfMatchesPerMatchDay, groupStage[i]);
+        for (let i = 0; i < groupStage.groups.length; i++) {
+            const numberOfMatchDays = groupStage.groups[i].teams.length - 1;
+            const numberOfMatchesPerMatchDay = groupStage.groups[i].teams.length / 2;
+            this.generateMatchDays(numberOfMatchDays, numberOfMatchesPerMatchDay, groupStage.groups[i].teams);
         }
     }
 
     generateMatchDays(numberOfMatchDays, numberOfMatchesPerMatchDay, groupTeams) {
-        let matchNumber = 1;
+        let homeIndex = 0;
+        let awayIndex = groupTeams.length - 2;
         for(let i = 0; i < numberOfMatchDays; i++) {
             const matchDay = []; // jornada vacía
+            let firstMatch = true;
 
             for (let j = 0; j < numberOfMatchesPerMatchDay; j++) {
-                matchDay.push(this.generateMatch(groupTeams, matchNumber));
-                matchNumber++;
+                matchDay.push(this.generateMatch(groupTeams, homeIndex, awayIndex, firstMatch));
+                
+                // hacemos un check de los indices y los modificamos
+                if (firstMatch) {
+                    firstMatch = false;
+                }
+                else {
+                    awayIndex--;
+                }
+                
+                homeIndex++;
+                
+
+                if (homeIndex > groupTeams.length - 2) {
+                    homeIndex = 0;
+                }
+
+                if (awayIndex < 0) {
+                    awayIndex = groupTeams.length - 2;
+                }
+
             }
 
-            this.matchSchedule.push(matchDay);
+            this.groupStage.matchSchedule.push(matchDay);
         }
     }
 
-    generateMatch(groupTeams, matchNumber) {
-        switch(matchNumber){
-            case 1:
-                return [groupTeams[0], groupTeams[1]];
-                break;
-            case 2:
-                return [groupTeams[2], groupTeams[3]];
-                break;
-            case 3:
-                return [groupTeams[1], groupTeams[2]];
-                break;
-            case 4:
-                return [groupTeams[3], groupTeams[0]];
-                break;
-            case 5:
-                return [groupTeams[1], groupTeams[3]];
-                break;
-            case 6:
-                return [groupTeams[0], groupTeams[2]];
-                break;
-        }        
+    generateMatch(groupTeams, homeIndex, awayIndex, firstMatch) {
+      // establecemos primer equipo del partido
+      const match = [];
+      let teamIndex = homeIndex;
+      match[0] = groupTeams[teamIndex];
+
+      //establecemos segundo equipo del partido
+      if (firstMatch){
+          // es el primer partido
+          // establecemos como segundo equipo el último del array
+          match[1] = groupTeams[groupTeams.length - 1];
+      }
+      else {
+          // no es el primer partido
+          teamIndex = awayIndex;
+          match[1] = groupTeams[teamIndex];
+      }
+      
+
+      return match;
+
+
     }
 }
