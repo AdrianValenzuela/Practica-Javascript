@@ -40,16 +40,13 @@ function printGroups() {
 }
 
 function printMatchesAndStanding() {
-    let groupsIndex = 0;
-    let matchGroupIndex = 1;
-
     const groupNames = worldCup.groupStage.map(group => group.groupName)
 
     for (let i = 1; i <= 3; i++) {// numero de jornadas para cada grupo
         for (let j = 0; j < groupNames.length; j++) {
             console.log(`Grupo ${groupNames[j]} - Jornada ${i}:`);
             console.log("--------------");
-            const matchDaySummary = worldCup.filterSummaryByGroupNameAndMatchDay(groupNames[groupsIndex], i)
+            const matchDaySummary = worldCup.filterSummaryByGroupNameAndMatchDay(groupNames[j], i)
             matchDaySummary.matchDaySummary.results.forEach(result => {
                 console.log(`${result.homeTeam} ${result.homeGoals} - ${result.awayTeam} ${result.awayGoals}`);
             });
