@@ -11,6 +11,28 @@ console.log("===COMIENZA EL MUNDIAL===");
 console.log("=========================");
 worldCup.startWorldCup();
 
+i = 1;
+    premier.summaries.forEach(summary => {
+        console.log(`Resumen Jornada ${i}`);
+        summary.results.forEach(result => {
+            console.log(`${result.homeTeam} ${result.homeGoals} - ${result.awayTeam} ${result.awayGoals}`);
+        });
+        console.table(summary.standing.map(team => {
+            return {
+                Team: team.name,
+                Points: team.points,
+                PlayedMatches: team.matchesWon + team.matchesDrawn + team.matchesLost,
+                Won: team.matchesWon,
+                Drawn: team.matchesDrawn,
+                Lost: team.matchesLost,
+                GoalsFor: team.goalsFor,
+                GoalsAgainst: team.goalsAgainst,
+                GoalsDiff: team.goalsFor - team.goalsAgainst
+            };
+        }));
+        i++;
+    });
+
 
 
 function printGroups() {
