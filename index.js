@@ -6,55 +6,62 @@ const worldCup = new WorldCup(Teams);
 console.log("Grupos y equipos");
 console.log("=========================");
 printGroups();
-console.log("=========================");
-console.log("===COMIENZA EL MUNDIAL===");
-console.log("=========================");
+console.log("===========================");
+console.log("=== COMIENZA EL MUNDIAL ===");
+console.log("===========================");
+console.log();
 worldCup.startWorldCup();
-
-i = 1;
-    premier.summaries.forEach(summary => {
-        console.log(`Resumen Jornada ${i}`);
-        summary.results.forEach(result => {
-            console.log(`${result.homeTeam} ${result.homeGoals} - ${result.awayTeam} ${result.awayGoals}`);
-        });
-        console.table(summary.standing.map(team => {
-            return {
-                Team: team.name,
-                Points: team.points,
-                PlayedMatches: team.matchesWon + team.matchesDrawn + team.matchesLost,
-                Won: team.matchesWon,
-                Drawn: team.matchesDrawn,
-                Lost: team.matchesLost,
-                GoalsFor: team.goalsFor,
-                GoalsAgainst: team.goalsAgainst,
-                GoalsDiff: team.goalsFor - team.goalsAgainst
-            };
-        }));
-        i++;
-    });
-
+printMatchesAndStanding();
+console.log("=====================================");
+console.log("=== COMIENZA LA FASE ELIMINATORIA ===");
+console.log("=====================================");
 
 
 function printGroups() {
-    let groupsIndex = 0;
-    worldCup.groupStage.groups.forEach(group => {
-        console.log("Grupo:", group.name);
+    worldCup.groupStage.forEach(group => {
+        console.log("Grupo:", group.groupName);
         console.log("--------------");
         group.teams.forEach(team => {
             console.log(team.name);
         });
         console.log()
-        let groupMatchIndex = 1;
-        for (let j = groupsIndex; j < groupsIndex + 3; j++) {
-            // sabemos que cada grupo son 3 jornadas
-            const matchDay = worldCup.groupStage.matchSchedule[j];
-            console.log(`Jornada ${groupMatchIndex}:`);
+
+        let index = 1;
+
+        group.matchSchedule.forEach(matchDay => {
+            console.log(`Jornada ${index}:`);
             matchDay.forEach(match => {
                 console.log(match[0] + " VS " + match[1]);
             });
-            groupMatchIndex++;
             console.log();
-        }
-        groupsIndex += 3;
+            index++;
+        });
     });
+}
+
+function printMatchesAndStanding() {
+    let groupsIndex = 0;
+    let matchGroupIndex = 1;
+
+    const groupNames = worldCup.groupStage.map(group => group.groupName)
+
+    for (let i = 1; i <= 3; i++) {// numero de jornadas para cada grupo
+        for (let j = 0; j < groupNames.length; j++) {
+            console.log(`Grupo ${groupNames[j]} - Jornada ${i}:`);
+            console.log("--------------");
+            const matchDaySummary = worldCup.filterSummaryByGroupNameAndMatchDay(groupNames[groupsIndex], i)
+            matchDaySummary.matchDaySummary.results.forEach(result => {
+                console.log(`${result.homeTeam} ${result.homeGoals} - ${result.awayTeam} ${result.awayGoals}`);
+            });
+            console.table(matchDaySummary.matchDaySummary.standing.map(stand => {
+                return {
+                    Equipo: stand.name,
+                    Puntos: stand.points,
+                    GolesMarcados: stand.goalsFor,
+                    GolesRecibidos: stand.goalsAgainst,
+                    DiferenciaGoles: stand.goalsFor - stand.goalsAgainst
+                };
+            }));
+        }
+    }
 }

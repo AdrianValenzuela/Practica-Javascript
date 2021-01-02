@@ -4,7 +4,7 @@ export default class WorldCup {
         this.name = "World Cup";
         this.config = {};
         this.setup();
-        this.groupStage = {};
+        this.groupStage = [];
         this.setupGroupStage(teams);
         this.setupMatchSchedule(this.groupStage);
         this.summaries = [];
@@ -43,11 +43,16 @@ export default class WorldCup {
         const groups = [groupA, groupB, groupC, groupD,
             groupE, groupF, groupG, groupH];
 
-        this.groupStage = {
-            groups: groups,
-            matchSchedule: [],
-            results: {}
-        };
+        for (const group of groups) {
+            const stage = {
+                groupName: group.name,
+                teams: group.teams,
+                matchSchedule: [],
+                results: {}
+            };
+
+            this.groupStage.push(stage);
+        }
     }
 
     generateGroup(teams, name) {
@@ -69,14 +74,15 @@ export default class WorldCup {
     }
 
     setupMatchSchedule(groupStage) {
-        for (let i = 0; i < groupStage.groups.length; i++) {
-            const numberOfMatchDays = groupStage.groups[i].teams.length - 1;
-            const numberOfMatchesPerMatchDay = groupStage.groups[i].teams.length / 2;
-            this.generateMatchDays(numberOfMatchDays, numberOfMatchesPerMatchDay, groupStage.groups[i].teams);
+        for (const group of groupStage) {
+            const numberOfMatchDays = group.teams.length - 1;
+            const numberOfMatchesPerMatchDay = group.teams.length / 2;
+
+            this.generateMatchDays(numberOfMatchDays, numberOfMatchesPerMatchDay, group.teams, group.groupName);
         }
     }
 
-    generateMatchDays(numberOfMatchDays, numberOfMatchesPerMatchDay, groupTeams) {
+    generateMatchDays(numberOfMatchDays, numberOfMatchesPerMatchDay, groupTeams, groupName) {
         let homeIndex = 0;
         let awayIndex = groupTeams.length - 2;
         for (let i = 0; i < numberOfMatchDays; i++) {
@@ -107,7 +113,11 @@ export default class WorldCup {
 
             }
 
-            this.groupStage.matchSchedule.push(matchDay);
+            this.groupStage.map(group => {
+                if (group.groupName == groupName) {
+                    group.matchSchedule.push(matchDay)
+                }
+            });
         }
     }
 
@@ -133,21 +143,33 @@ export default class WorldCup {
     }
 
     startWorldCup() {
-        for (const matchDay of this.groupStage.matchSchedule) {
-            const matchDaySummary = {
-                results: [],
-                standing: undefined
-            };
+        this.groupStage.forEach(group => {
+            let index = 1;
+            for (const matchDay of group.matchSchedule) {
+                const matchDaySummary = {
+                    results: [],
+                    standing: undefined
+                };
 
-            for (const match of matchDay) {
-                var result = this.playMatch(match);
-                this.updateTeams(result);
-                matchDaySummary.results.push(result);
+                for (const match of matchDay) {
+                    var result = this.playMatch(match);
+                    this.updateTeams(result, group.groupName);
+                    matchDaySummary.results.push(result);
+                }
+
+                this.getStanding(group.groupName);
+                matchDaySummary.standing = this.groupStage.find(GROUP => GROUP.groupName == group.groupName).teams.map(team => Object.assign({}, team));
+
+                const summary = {
+                    groupName: group.groupName,
+                    matchDay: index,
+                    matchDaySummary: matchDaySummary
+                };
+
+                this.summaries.push(summary);
+                index++;
             }
-            this.getStanding("A");
-            matchDaySummary.standing = this.groupStage.groups[0].teams.map(team => Object.assign({}, team));
-            this.summaries.push(matchDaySummary);
-        }
+        });
     }
 
     playMatch(match) {
@@ -161,9 +183,9 @@ export default class WorldCup {
         };
     }
 
-    updateTeams(result) {
-        const homeTeam = this.filterTeamByName(result.homeTeam);
-        const awayTeam = this.filterTeamByName(result.awayTeam);
+    updateTeams(result, groupName) {
+        const homeTeam = this.filterTeamByGroupNameAndTeamName(groupName, result.homeTeam);
+        const awayTeam = this.filterTeamByGroupNameAndTeamName(groupName, result.awayTeam);
 
         if (homeTeam && awayTeam) {
             homeTeam.goalsFor += result.homeGoals;
@@ -196,7 +218,7 @@ export default class WorldCup {
     }
 
     getStanding(groupName) {
-        const group = this.groupStage.groups.filter(group => group.name == groupName);
+        const group = this.groupStage.filter(group => group.groupName == groupName);
         group[0].teams.sort(function (teamA, teamB) {
             if (teamA.points > teamB.points) {
                 return -1;
@@ -225,17 +247,11 @@ export default class WorldCup {
         return Math.round(Math.random() * 10)
     }
 
-    filterTeamByName(name) {
-        let result = "";
-        this.groupStage.groups.find(function (group) {
-            const teamName = "";
-            for (const team of group.teams) {
-                if (team.name == name) {
-                    result = team;
-                }
-            }
-        })
+    filterTeamByGroupNameAndTeamName(groupName, teamName) {
+        return this.groupStage.find(group => group.groupName == groupName).teams.find(team => team.name == teamName);
+    }
 
-        return result;
+    filterSummaryByGroupNameAndMatchDay(groupName, matchDay) {
+        return this.summaries.find(summary => summary.groupName == groupName && summary.matchDay == matchDay);
     }
 }
