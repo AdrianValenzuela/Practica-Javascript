@@ -9,6 +9,7 @@ printGroups();
 console.log("=========================");
 console.log("===COMIENZA EL MUNDIAL===");
 console.log("=========================");
+worldCup.startWorldCup();
 
 
 

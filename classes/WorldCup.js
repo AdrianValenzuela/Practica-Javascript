@@ -1,12 +1,11 @@
 export default class WorldCup {
 
-    constructor (teams = [], config = {}) {
+    constructor (teams) {
         this.name = "World Cup";
         this.config = {};
         this.setup(); 
         this.groupStage = {};
         this.setupGroupStage(teams);
-        this.matchSchedule = [];
         this.setupMatchSchedule(this.groupStage);
     }
 
@@ -114,10 +113,103 @@ export default class WorldCup {
           teamIndex = awayIndex;
           match[1] = groupTeams[teamIndex];
       }
-      
 
       return match;
+    }
 
+    startWorldCup() {
+        for (const matchDay of this.groupStage.matchSchedule) {
+            const matchDaySummary = {
+                results: [],
+                standing: undefined
+            };
 
+            for (const match of matchDay) {
+                var result = this.playMatch(match);
+                this.updateTeams(result);
+                matchDaySummary.results.push(result);
+                this.getStanding();
+                console.log();
+            }
+        }
+    }
+
+    playMatch(match) {
+        const homeGoals = this.generateGoals();
+        const awayGoals = this.generateGoals();
+        return {
+            homeTeam: match[0],
+            homeGoals: homeGoals,
+            awayTeam: match[1],
+            awayGoals: awayGoals
+        };
+    }
+
+    updateTeams(result){
+        const homeTeam = this.filterTeamByName(result.homeTeam);
+        const awayTeam = this.filterTeamByName(result.awayTeam);
+
+        if (homeTeam && awayTeam) {
+            homeTeam.goalsFor += result.homeGoals;
+            homeTeam.goalsAgainst += result.awayGoals;
+            awayTeam.goalsFor += result.awayGoals;
+            awayTeam.goalsAgainst += result.homeGoals;
+
+            if (result.homeGoals > result.awayGoals) {
+                // gana equipo local
+                homeTeam.points += this.config.pointsPerWin;
+                homeTeam.matchesWon += 1;
+                awayTeam.points += this.config.pointsPerLose;
+                awayTeam.matchesLost += 1;
+            }
+            else if (result.homeGoals < result.awayGoals) {
+                // gana equipo visitante
+                awayTeam.points += this.config.pointsPerWin;
+                awayTeam.matchesWon += 1;
+                homeTeam.points += this.config.pointsPerLose;
+                homeTeam.matchesLost += 1;
+            }
+            else {
+                // empate
+                homeTeam.points += this.config.pointsPerDraw;
+                homeTeam.matchesDrawn += 1;
+                awayTeam.points += this.config.pointsPerDraw;
+                awayTeam.matchesDrawn += 1;
+            }
+        }
+    }
+
+    getStanding() {
+        this.teams.sort(function(teamA, teamB) {
+            if (teamA.points > teamB.points) {
+                return -1;
+            }
+            else if (teamA.points < teamB.points) {
+                return 1;
+            }
+            else {
+                const goalsDiffA = teamA.goalsFor - teamA.goalsAgainst;
+                const goalsDiffB = teamB.goalsFor - teamB.goalsAgainst;
+
+                if (goalsDiffA > goalsDiffB) {
+                    return -1;
+                }
+                else if (goalsDiffA < goalsDiffB) {
+                    return 1;
+                }
+                else {
+                    return 0;
+                }
+            }
+        });
+        console.table(this.teams);
+    }
+
+    generateGoals() {
+        return Math.round(Math.random() * 10)
+    }
+
+    filterTeamByName(name) {
+        return this.groupStage.groups.find(team => team.name == name);
     }
 }
