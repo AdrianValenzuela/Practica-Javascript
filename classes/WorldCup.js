@@ -1,12 +1,13 @@
 export default class WorldCup {
 
-    constructor (teams) {
+    constructor(teams) {
         this.name = "World Cup";
         this.config = {};
-        this.setup(); 
+        this.setup();
         this.groupStage = {};
         this.setupGroupStage(teams);
         this.setupMatchSchedule(this.groupStage);
+        this.summaries = [];
     }
 
     setup() {
@@ -14,6 +15,18 @@ export default class WorldCup {
             pointsPerWin: 3,
             pointsPerDraw: 1,
             pointsPerLose: 0
+        };
+    }
+
+    setupTeams(name) {
+        return {
+            name: name,
+            matchesWon: 0,
+            matchesDrawn: 0,
+            matchesLost: 0,
+            points: 0,
+            goalsFor: 0,
+            goalsAgainst: 0
         };
     }
 
@@ -28,7 +41,7 @@ export default class WorldCup {
         const groupH = this.generateGroup(teams, 'H');
 
         const groups = [groupA, groupB, groupC, groupD,
-                        groupE, groupF, groupG, groupH];
+            groupE, groupF, groupG, groupH];
 
         this.groupStage = {
             groups: groups,
@@ -42,10 +55,12 @@ export default class WorldCup {
             name: name,
             teams: []
         };
+
         let numberOfTeams = teams.length;
         for (let i = 0; i < 4; i++) {
             const randomIndex = Math.floor((Math.random() * numberOfTeams));
-            group.teams.push(teams[randomIndex]);
+            const team = this.setupTeams(teams[randomIndex]);
+            group.teams.push(team);
             teams.splice(randomIndex, 1);
             numberOfTeams = teams.length;
         }
@@ -64,13 +79,13 @@ export default class WorldCup {
     generateMatchDays(numberOfMatchDays, numberOfMatchesPerMatchDay, groupTeams) {
         let homeIndex = 0;
         let awayIndex = groupTeams.length - 2;
-        for(let i = 0; i < numberOfMatchDays; i++) {
+        for (let i = 0; i < numberOfMatchDays; i++) {
             const matchDay = []; // jornada vacía
             let firstMatch = true;
 
             for (let j = 0; j < numberOfMatchesPerMatchDay; j++) {
                 matchDay.push(this.generateMatch(groupTeams, homeIndex, awayIndex, firstMatch));
-                
+
                 // hacemos un check de los indices y los modificamos
                 if (firstMatch) {
                     firstMatch = false;
@@ -78,9 +93,9 @@ export default class WorldCup {
                 else {
                     awayIndex--;
                 }
-                
+
                 homeIndex++;
-                
+
 
                 if (homeIndex > groupTeams.length - 2) {
                     homeIndex = 0;
@@ -97,24 +112,24 @@ export default class WorldCup {
     }
 
     generateMatch(groupTeams, homeIndex, awayIndex, firstMatch) {
-      // establecemos primer equipo del partido
-      const match = [];
-      let teamIndex = homeIndex;
-      match[0] = groupTeams[teamIndex];
+        // establecemos primer equipo del partido
+        const match = [];
+        let teamIndex = homeIndex;
+        match[0] = groupTeams[teamIndex].name;
 
-      //establecemos segundo equipo del partido
-      if (firstMatch){
-          // es el primer partido
-          // establecemos como segundo equipo el último del array
-          match[1] = groupTeams[groupTeams.length - 1];
-      }
-      else {
-          // no es el primer partido
-          teamIndex = awayIndex;
-          match[1] = groupTeams[teamIndex];
-      }
+        //establecemos segundo equipo del partido
+        if (firstMatch) {
+            // es el primer partido
+            // establecemos como segundo equipo el último del array
+            match[1] = groupTeams[groupTeams.length - 1].name;
+        }
+        else {
+            // no es el primer partido
+            teamIndex = awayIndex;
+            match[1] = groupTeams[teamIndex].name;
+        }
 
-      return match;
+        return match;
     }
 
     startWorldCup() {
@@ -128,9 +143,10 @@ export default class WorldCup {
                 var result = this.playMatch(match);
                 this.updateTeams(result);
                 matchDaySummary.results.push(result);
-                this.getStanding();
-                console.log();
             }
+            this.getStanding("A");
+            matchDaySummary.standing = this.groupStage.groups[0].teams.map(team => Object.assign({}, team));
+            this.summaries.push(matchDaySummary);
         }
     }
 
@@ -145,7 +161,7 @@ export default class WorldCup {
         };
     }
 
-    updateTeams(result){
+    updateTeams(result) {
         const homeTeam = this.filterTeamByName(result.homeTeam);
         const awayTeam = this.filterTeamByName(result.awayTeam);
 
@@ -179,8 +195,9 @@ export default class WorldCup {
         }
     }
 
-    getStanding() {
-        this.teams.sort(function(teamA, teamB) {
+    getStanding(groupName) {
+        const group = this.groupStage.groups.filter(group => group.name == groupName);
+        group[0].teams.sort(function (teamA, teamB) {
             if (teamA.points > teamB.points) {
                 return -1;
             }
@@ -202,7 +219,6 @@ export default class WorldCup {
                 }
             }
         });
-        console.table(this.teams);
     }
 
     generateGoals() {
@@ -210,6 +226,16 @@ export default class WorldCup {
     }
 
     filterTeamByName(name) {
-        return this.groupStage.groups.find(team => team.name == name);
+        let result = "";
+        this.groupStage.groups.find(function (group) {
+            const teamName = "";
+            for (const team of group.teams) {
+                if (team.name == name) {
+                    result = team;
+                }
+            }
+        })
+
+        return result;
     }
 }

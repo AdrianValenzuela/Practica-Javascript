@@ -19,7 +19,7 @@ function printGroups() {
         console.log("Grupo:", group.name);
         console.log("--------------");
         group.teams.forEach(team => {
-            console.log(team);
+            console.log(team.name);
         });
         console.log()
         let groupMatchIndex = 1;
