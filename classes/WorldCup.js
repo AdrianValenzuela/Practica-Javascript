@@ -8,6 +8,7 @@ export default class WorldCup {
         this.setupGroupStage(teams);
         this.setupMatchSchedule(this.groupStage);
         this.summaries = [];
+        this.playOff = [];
     }
 
     setup() {
@@ -241,6 +242,66 @@ export default class WorldCup {
                 }
             }
         });
+    }
+
+    getClassificatedTeams() {
+        const groups = ["A", "B", "C", "D", "E", "F", "G", "H"];
+
+        for (const group of groups) {
+            const lastGroupSummary = this.filterSummaryByGroupNameAndMatchDay(group, 3); // el último resumen tiene el total de puntos de cada grupo.
+            this.getTeamsClassificatedByGroup(group, lastGroupSummary.matchDaySummary.standing, this.summaries);
+        }
+    }
+
+    getTeamsClassificatedByGroup(group, standing, Summaries) {
+        standing.sort(function (teamA, teamB) {
+            if (teamA.points > teamB.points) {
+                return -1;
+            }
+            else if (teamA.points < teamB.points) {
+                return 1
+            }
+            else {
+                // empatan a puntos
+                const summaries = Summaries.filter(summary => summary.groupName == group);
+
+                for (const summary of summaries) {
+                    const match = summary.matchDaySummary.results.filter(match => (match.homeTeam == teamA.name && match.awayTeam == teamB.name) ||
+                        (match.homeTeam == teamB.name && match.awayTeam == teamA.name));
+
+                    if (match.length != 0) {
+                        // ha encontrado partido
+                        if (match[0].homeGoals > match[0].awayGoals) {
+                            // teamA ganó el partido directo
+                            return -1;
+                        }
+                        else if (match[0].homeGoals < match[0].awayGoals) {
+                            // teamB ganó el partido directo
+                            return 1;
+                        }
+                        else {
+                            // empataron el partido, se clasifica por orden alfabético
+                            const teams = [teamA.name, teamB.name]
+                            teams.sort();
+
+                            if (teams[0] == teamA.name) {
+                                return -1;
+                            }
+                            else {
+                                return 1;
+                            }
+                        }
+                    }
+                }
+            }
+        });
+        const classificatedTeams = {
+            group: group,
+            firstPlace: standing[0].name,
+            secondPlace: standing[1].name
+        }
+
+        this.playOff.push(classificatedTeams);
     }
 
     generateGoals() {

@@ -15,6 +15,7 @@ printMatchesAndStanding();
 console.log("=====================================");
 console.log("=== COMIENZA LA FASE ELIMINATORIA ===");
 console.log("=====================================");
+worldCup.getClassificatedTeams();
 
 
 function printGroups() {
