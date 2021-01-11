@@ -9,6 +9,7 @@ export default class WorldCup {
         this.setupMatchSchedule(this.groupStage);
         this.summaries = [];
         this.playOff = [];
+        this.eliminatorySchedule = [];
     }
 
     setup() {
@@ -304,6 +305,68 @@ export default class WorldCup {
         this.playOff.push(classificatedTeams);
     }
 
+    setupEliminatorySchedule(playoff) {
+        const firstTeamsABCD = this.filterClassificatedTeamByGroupAndPlace(["A", "B", "C", "D"], "first");
+        const secondTeamsEFGH = this.filterClassificatedTeamByGroupAndPlace(["E", "F", "G", "H"], "second");
+        const firstTeamsEFGH = this.filterClassificatedTeamByGroupAndPlace(["E", "F", "G", "H"], "first");
+        const secondTeamsABCD = this.filterClassificatedTeamByGroupAndPlace(["A", "B", "C", "D"], "second");
+
+        for (let i = 0; i < firstTeamsABCD.length; i++) {
+            const match = {
+                homeTeam: firstTeamsABCD[i],
+                homeGoals: 0,
+                awayTeam: secondTeamsEFGH[i],
+                awayGoals: 0
+            };
+
+            this.eliminatorySchedule.push(match);
+        }
+
+        for (let i = 0; i < firstTeamsEFGH.length; i++) {
+            const match = {
+                homeTeam: firstTeamsEFGH[i],
+                homeGoals: 0,
+                awayTeam: secondTeamsABCD[i],
+                awayGoals: 0
+            };
+
+            this.eliminatorySchedule.push(match);
+        }
+    }
+
+    playRound() {
+        const classificatedTeams = [];
+        const newEliminatorySchedule = [];
+        for (const match of this.eliminatorySchedule) {
+            let result = this.playMatch([match.homeTeam, match.awayTeam]);
+            while (result.homeGoals == result.awayGoals) {
+                // en caso de empate volver a jugar
+                result = this.playMatch([match.homeTeam, match.awayTeam]);
+            }
+            console.log(`${match.homeTeam} ${result.homeGoals} - ${result.awayGoals} ${match.awayTeam}`);
+
+            if (result.homeGoals > result.awayGoals) {
+                classificatedTeams.push(match.homeTeam);
+            }
+            else {
+                classificatedTeams.push(match.awayTeam);
+            }
+        }
+
+        for (let i = 0; i < classificatedTeams.length; i++) {
+            const match = {
+                homeTeam: classificatedTeams[i],
+                homeGoals: 0,
+                awayTeam: classificatedTeams[i + 1],
+                awayGoals: 0
+            }
+
+            newEliminatorySchedule.push(match);
+            i++;
+        }
+        this.eliminatorySchedule = newEliminatorySchedule;
+    }
+
     generateGoals() {
         return Math.round(Math.random() * 10)
     }
@@ -314,5 +377,19 @@ export default class WorldCup {
 
     filterSummaryByGroupNameAndMatchDay(groupName, matchDay) {
         return this.summaries.find(summary => summary.groupName == groupName && summary.matchDay == matchDay);
+    }
+
+    filterClassificatedTeamByGroupAndPlace(groupNames, place) {
+        const teamNames = []
+        for (const groupName of groupNames) {
+            if (place == "first") {
+                teamNames.push(this.playOff.find(group => group.group == groupName).firstPlace);
+            }
+            else {
+                teamNames.push(this.playOff.find(group => group.group == groupName).secondPlace);
+            }
+        }
+
+        return teamNames;
     }
 }

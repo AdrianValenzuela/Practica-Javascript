@@ -15,7 +15,38 @@ printMatchesAndStanding();
 console.log("=====================================");
 console.log("=== COMIENZA LA FASE ELIMINATORIA ===");
 console.log("=====================================");
+console.log();
 worldCup.getClassificatedTeams();
+worldCup.setupEliminatorySchedule(worldCup.playOff);
+console.log("=== OCTAVOS DE FINAL ===");
+worldCup.playRound();
+console.log();
+console.log("=== CUARTOS DE FINAL ===");
+worldCup.playRound();
+console.log();
+console.log("=== SEMIFINALES ===");
+
+const fourLastTeams = worldCup.eliminatorySchedule.map(team => team.homeTeam);
+worldCup.eliminatorySchedule.map(team => team.awayTeam).forEach(team => {
+    fourLastTeams.push(team);
+});
+worldCup.playRound();
+console.log();
+
+console.log("=== TERCER Y CUARTO PUESTO ===");
+const match = [];
+const finalistTeams = worldCup.eliminatorySchedule.map(team => team.homeTeam);
+worldCup.eliminatorySchedule.map(team => team.awayTeam).forEach(team => {
+    finalistTeams.push(team);
+});
+
+for (const team of fourLastTeams) {
+    if (!finalistTeams.includes(team)) {
+        match.push(team);
+    }
+}
+console.log();
+
 
 
 function printGroups() {
@@ -61,5 +92,11 @@ function printMatchesAndStanding() {
                 };
             }));
         }
+    }
+}
+
+function printRound(matches) {
+    for (const match of matches) {
+        console.log(match[0] + " VS " + match[1]);
     }
 }
