@@ -337,20 +337,24 @@ export default class WorldCup {
     playRound() {
         const classificatedTeams = [];
         const newEliminatorySchedule = [];
+        let winnerTeam = "";
         for (const match of this.eliminatorySchedule) {
             let result = this.playMatch([match.homeTeam, match.awayTeam]);
             while (result.homeGoals == result.awayGoals) {
                 // en caso de empate volver a jugar
                 result = this.playMatch([match.homeTeam, match.awayTeam]);
-            }
-            console.log(`${match.homeTeam} ${result.homeGoals} - ${result.awayGoals} ${match.awayTeam}`);
+            }           
 
             if (result.homeGoals > result.awayGoals) {
                 classificatedTeams.push(match.homeTeam);
+                winnerTeam = match.homeTeam;
             }
             else {
                 classificatedTeams.push(match.awayTeam);
+                winnerTeam = match.awayTeam;
             }
+
+            console.log(`${match.homeTeam} ${result.homeGoals} - ${result.awayGoals} ${match.awayTeam} => ${winnerTeam}`);
         }
 
         for (let i = 0; i < classificatedTeams.length; i++) {
@@ -365,6 +369,26 @@ export default class WorldCup {
             i++;
         }
         this.eliminatorySchedule = newEliminatorySchedule;
+    }
+
+    playThirdPlaceMatch(match) {
+        let homeGoals = this.generateGoals();
+        let awayGoals = this.generateGoals();
+        let thirdPlaceTeam = "";
+
+        while (homeGoals == awayGoals) {
+            homeGoals = this.generateGoals();
+            awayGoals = this.generateGoals();
+        }
+        
+        if (homeGoals > awayGoals) {
+            thirdPlaceTeam = match[0];
+        }
+        else {
+            thirdPlaceTeam = match[1];
+        }
+
+        console.log(`${match[0]} ${homeGoals} - ${awayGoals} ${match[1]} => ${thirdPlaceTeam}`);
     }
 
     generateGoals() {

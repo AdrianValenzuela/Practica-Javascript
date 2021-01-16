@@ -25,27 +25,20 @@ console.log("=== CUARTOS DE FINAL ===");
 worldCup.playRound();
 console.log();
 console.log("=== SEMIFINALES ===");
-
-const fourLastTeams = worldCup.eliminatorySchedule.map(team => team.homeTeam);
-worldCup.eliminatorySchedule.map(team => team.awayTeam).forEach(team => {
-    fourLastTeams.push(team);
-});
+const fourLastTeams = getFourLastTeams();
 worldCup.playRound();
 console.log();
-
 console.log("=== TERCER Y CUARTO PUESTO ===");
-const match = [];
-const finalistTeams = worldCup.eliminatorySchedule.map(team => team.homeTeam);
-worldCup.eliminatorySchedule.map(team => team.awayTeam).forEach(team => {
-    finalistTeams.push(team);
-});
-
-for (const team of fourLastTeams) {
-    if (!finalistTeams.includes(team)) {
-        match.push(team);
-    }
-}
+const match = getTeamsDecideThirdPlace(fourLastTeams);
+worldCup.playThirdPlaceMatch(match);
 console.log();
+console.log("=== FINAL ===");
+worldCup.playRound();
+console.log();
+console.log("=====================================");
+console.log(`${worldCup.eliminatorySchedule[0].homeTeam} campeón del mundo!`);
+console.log("=====================================");
+
 
 
 
@@ -95,8 +88,27 @@ function printMatchesAndStanding() {
     }
 }
 
-function printRound(matches) {
-    for (const match of matches) {
-        console.log(match[0] + " VS " + match[1]);
+function getFourLastTeams() {
+    const fourLastTeams = worldCup.eliminatorySchedule.map(team => team.homeTeam);
+    worldCup.eliminatorySchedule.map(team => team.awayTeam).forEach(team => {
+        fourLastTeams.push(team);
+    });
+
+    return fourLastTeams;
+}
+
+function getTeamsDecideThirdPlace(fourLastTeams) {
+    const match = [];
+    const finalistTeams = worldCup.eliminatorySchedule.map(team => team.homeTeam);
+    worldCup.eliminatorySchedule.map(team => team.awayTeam).forEach(team => {
+        finalistTeams.push(team);
+    });
+
+    for (const team of fourLastTeams) {
+        if (!finalistTeams.includes(team)) {
+            match.push(team);
+        }
     }
+
+    return match;
 }
