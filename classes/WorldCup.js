@@ -281,15 +281,26 @@ export default class WorldCup {
                             return 1;
                         }
                         else {
-                            // empataron el partido, se clasifica por orden alfabético
-                            const teams = [teamA.name, teamB.name]
-                            teams.sort();
-
-                            if (teams[0] == teamA.name) {
+                            // empatan el partido directo
+                            if ((teamA.goalsFor - teamA.goalsAgainst) < (teamB.goalsFor - teamB.goalsAgainst)) {
+                                // teamA tiene menor diferencia de goles, por lo tanto gana
                                 return -1;
                             }
-                            else {
+                            else if ((teamA.goalsFor - teamA.goalsAgainst) > (teamB.goalsFor - teamB.goalsAgainst)) {
+                                // teamB tiene menor diferencia de goles, por lo tanto gana
                                 return 1;
+                            }
+                            else {
+                                // empatan el partido y la diferencia de goles es la misma
+                                const teams = [teamA.name, teamB.name]
+                                teams.sort();
+
+                                if (teams[0] == teamA.name) {
+                                    return -1;
+                                }
+                                else {
+                                    return 1;
+                                }
                             }
                         }
                     }
